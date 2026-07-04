@@ -1,0 +1,24 @@
+---
+interface Props {
+  topic: 'cs' | 'linguistics' | 'personal-projects' | 'other' | 'project' | 'note';
+}
+
+const { topic } = Astro.props;
+
+const meta: Record<string, { code: string; label: string }> = {
+  cs: { code: 'CS', label: 'computer science' },
+  linguistics: { code: 'LX', label: 'linguistics' },
+  'personal-projects': { code: 'PP', label: 'personal projects' },
+  other: { code: 'MISC', label: 'other' },
+  project: { code: 'PROJ', label: 'project' },
+  note: { code: 'NB', label: 'notebook' },
+};
+
+const { code, label } = meta[topic] ?? meta.other;
+const dataTopic = topic === 'project' || topic === 'note' ? 'other' : topic;
+---
+<span class="gloss" data-topic={dataTopic}>
+  <span class="gloss-code">{code}</span>
+  <span class="gloss-rule"></span>
+  <span class="gloss-label">{label}</span>
+</span>

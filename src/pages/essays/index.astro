@@ -1,0 +1,157 @@
+---
+import Base from '../../layouts/Base.astro';
+import GlossTag from '../../components/GlossTag.astro';
+import { getCollection } from 'astro:content';
+
+const allEssays = (await getCollection('essays', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const topics = [
+  { key: 'all', label: 'All' },
+  { key: 'cs', label: 'CS' },
+  { key: 'linguistics', label: 'Linguistics' },
+  { key: 'projects', label: 'Projects' },
+  { key: 'other', label: 'Other' },
+];
+
+const dateFmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+---
+<Base title="Essays — yourname" description="All essays, filterable by topic.">
+  <h1 class="page-title">Essays</h1>
+
+  <div class="filters" role="tablist" aria-label="Filter essays by topic">
+    {topics.map((t) => (
+      <button class="filter-btn" data-topic={t.key} role="tab" aria-selected={t.key === 'all'}>
+        {t.label}
+      </button>
+    ))}
+  </div>
+
+  <ol class="essay-list">
+    {allEssays.map((essay) => (
+      <li class="essay-item" data-topic={essay.data.topic}>
+        <a href={`/essays/${essay.id}`} class="essay-link">
+          <GlossTag topic={essay.data.topic} />
+          <div>
+            <h2>{essay.data.title}</h2>
+            <p class="essay-desc">{essay.data.description}</p>
+            <p class="essay-date">{dateFmt(essay.data.date)}</p>
+          </div>
+        </a>
+      </li>
+    ))}
+  </ol>
+
+  <p class="empty-state" hidden>Nothing here yet for this topic.</p>
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const items = document.querySelectorAll<HTMLLIElement>('.essay-item');
+  const emptyState = document.querySelector<HTMLParagraphElement>('.empty-state');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach((b) => b.setAttribute('aria-selected', 'false'));
+      btn.setAttribute('aria-selected', 'true');
+      const topic = btn.dataset.topic;
+      let visibleCount = 0;
+      items.forEach((item) => {
+        const match = topic === 'all' || item.dataset.topic === topic;
+        item.hidden = !match;
+        if (match) visibleCount++;
+      });
+      if (emptyState) emptyState.hidden = visibleCount !== 0;
+    });
+  });
+</script>
+
+<style>
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .filter-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .filter-btn[aria-selected="true"] {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .essay-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .essay-item {
+    border-top: 1px solid var(--rule);
+  }
+
+  .essay-item:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-link {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 20px;
+    padding: 20px 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .essay-link h2 {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .essay-desc {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+
+  .essay-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  .empty-state {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 24px 0;
+  }
+
+  @media (max-width: 480px) {
+    .essay-link {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+</style>

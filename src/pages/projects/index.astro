@@ -1,0 +1,146 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const allProjects = (await getCollection('projects')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const statusLabel: Record<string, string> = {
+  active: 'In progress',
+  shipped: 'Shipped',
+  archived: 'Archived',
+};
+---
+<Base title="Projects — yourname" description="Things I've built.">
+  <h1 class="page-title">Projects</h1>
+  <p class="page-intro">A running record of things I've built, finished and otherwise.</p>
+
+  <div class="project-grid">
+    {allProjects.map((project) => (
+      <a href={`/projects/${project.id}`} class="project-card">
+        <div class="thumb" aria-hidden="true">
+          <span class="thumb-glyph">{project.data.title.charAt(0)}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-top">
+            <h2>{project.data.title}</h2>
+            <span class="status">{statusLabel[project.data.status]}</span>
+          </div>
+          <p class="card-desc">{project.data.description}</p>
+          <div class="tags">
+            {project.data.tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        </div>
+      </a>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .page-intro {
+    color: var(--ink-soft);
+    max-width: var(--measure);
+    margin-bottom: 32px;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .project-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    text-decoration: none;
+    color: inherit;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+
+  .project-card:hover {
+    border-color: var(--rule-strong);
+  }
+
+  .thumb {
+    background: var(--indigo-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .thumb-glyph {
+    font-family: var(--font-display);
+    font-size: 36px;
+    color: var(--indigo);
+  }
+
+  .card-body {
+    padding: 18px 20px 18px 0;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-top h2 {
+    font-size: 18px;
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .card-desc {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 8px 0 12px;
+  }
+
+  .tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--amber-bg);
+    color: var(--amber);
+    padding: 3px 8px;
+    border-radius: var(--radius);
+  }
+
+  @media (max-width: 480px) {
+    .project-card {
+      grid-template-columns: 1fr;
+    }
+
+    .thumb {
+      height: 80px;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+  }
+</style>

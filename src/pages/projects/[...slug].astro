@@ -1,0 +1,164 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const statusLabel: Record<string, string> = {
+  active: 'In progress',
+  shipped: 'Shipped',
+  archived: 'Archived',
+};
+
+const dateFmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+<Base title={`${project.data.title} — yourname`} description={project.data.description}>
+  <article>
+    <a href="/projects" class="back-link">&larr; All projects</a>
+    <header class="project-header">
+      <div class="header-top">
+        <h1>{project.data.title}</h1>
+        <span class="status">{statusLabel[project.data.status]}</span>
+      </div>
+      <p class="project-meta">{dateFmt(project.data.date)}</p>
+      <div class="tags">
+        {project.data.tags.map((tag) => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+      <div class="links">
+        {project.data.liveUrl && (
+          <a href={project.data.liveUrl} class="link-item">Live demo &rarr;</a>
+        )}
+        {project.data.sourceUrl && (
+          <a href={project.data.sourceUrl} class="link-item">Source &rarr;</a>
+        )}
+      </div>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .back-link {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    margin-bottom: 32px;
+  }
+
+  .back-link:hover {
+    color: var(--ink);
+  }
+
+  .project-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .header-top h1 {
+    font-size: 30px;
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .project-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin: 8px 0 16px;
+  }
+
+  .tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--amber-bg);
+    color: var(--amber);
+    padding: 3px 8px;
+    border-radius: var(--radius);
+  }
+
+  .links {
+    display: flex;
+    gap: 20px;
+  }
+
+  .link-item {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--indigo);
+    text-decoration: none;
+  }
+
+  .link-item:hover {
+    text-decoration: underline;
+  }
+
+  .prose {
+    max-width: var(--measure);
+    font-size: 17px;
+  }
+
+  .prose :global(h2) {
+    font-size: 21px;
+    margin: 2em 0 0.6em;
+  }
+
+  .prose :global(p) {
+    margin: 0 0 1.2em;
+  }
+
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--paper-raised);
+    padding: 2px 5px;
+    border-radius: var(--radius);
+  }
+
+  .prose :global(pre) {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow-x: auto;
+  }
+</style>

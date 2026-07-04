@@ -1,0 +1,114 @@
+---
+import Base from '../layouts/Base.astro';
+import GlossTag from '../components/GlossTag.astro';
+import { getCollection } from 'astro:content';
+
+const essays = (await getCollection('essays', ({ data }) => !data.draft)).map((e) => ({
+  kind: 'essay' as const,
+  date: e.data.date,
+  title: e.data.title,
+  description: e.data.description,
+  topic: e.data.topic,
+  href: `/essays/${e.id}`,
+}));
+
+const projects = (await getCollection('projects')).map((p) => ({
+  kind: 'project' as const,
+  date: p.data.date,
+  title: p.data.title,
+  description: p.data.description,
+  topic: 'project' as const,
+  href: `/projects/${p.id}`,
+}));
+
+const feed = [...essays, ...projects].sort((a, b) => b.date.valueOf() - a.date.valueOf());
+
+const dateFmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+---
+<Base title="yourname — feed">
+  <section class="intro">
+    <h1>7qffza5d</h1>
+    <p class="tagline">Essays from an aspiring mind of a madman.</p>
+  </section>
+
+  <ol class="feed">
+    {feed.map((item) => (
+      <li class="feed-item">
+        <a href={item.href} class="feed-link">
+          <GlossTag topic={item.topic} />
+          <div class="feed-body">
+            <h2>{item.title}</h2>
+            <p class="feed-desc">{item.description}</p>
+            <p class="feed-date">{dateFmt(item.date)}</p>
+          </div>
+        </a>
+      </li>
+    ))}
+  </ol>
+</Base>
+
+<style>
+  .intro {
+    margin-bottom: 48px;
+  }
+
+  .intro h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .tagline {
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: var(--measure);
+  }
+
+  .feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .feed-item {
+    border-top: 1px solid var(--rule);
+  }
+
+  .feed-item:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feed-link {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 20px;
+    padding: 20px 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .feed-body h2 {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .feed-desc {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+
+  .feed-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    .feed-link {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+</style>

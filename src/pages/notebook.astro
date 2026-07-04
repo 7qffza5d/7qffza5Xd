@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Notebook — yourname" description="A place for whatever comes next.">
+  <h1 class="page-title">Notebook</h1>
+  <p class="page-intro">
+    Reserved for whatever doesn't fit elsewhere yet — a reading log, short
+    notes, photos, or anything else that comes up later.
+  </p>
+  <div class="stub">
+    <p class="stub-code">// empty</p>
+    <p class="stub-text">Nothing here yet.</p>
+  </div>
+</Base>
+
+<style>
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .page-intro {
+    color: var(--ink-soft);
+    max-width: var(--measure);
+    margin-bottom: 32px;
+  }
+
+  .stub {
+    border: 1px dashed var(--rule-strong);
+    border-radius: 6px;
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .stub-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin: 0 0 6px;
+  }
+
+  .stub-text {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+</style>
